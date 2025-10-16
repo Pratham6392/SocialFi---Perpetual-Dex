@@ -72,8 +72,17 @@ export default function ExchangeTVChart(props) {
   });
 
   useEffect(() => {
-    dataProvider.current = new TVDataProvider();
-  }, []);
+    console.log('ExchangeTVChart: Initializing TVDataProvider for chainId:', chainId);
+    dataProvider.current = new TVDataProvider(chainId);
+    
+    // Cleanup on unmount
+    return () => {
+      if (dataProvider.current) {
+        console.log('ExchangeTVChart: Cleaning up TVDataProvider');
+        dataProvider.current.cleanup();
+      }
+    };
+  }, [chainId]);
 
   useEffect(() => {
     const tmp = getChartToken(swapOption, fromToken, toToken, chainId);

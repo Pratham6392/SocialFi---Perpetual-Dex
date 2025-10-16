@@ -1,0 +1,116 @@
+.LeverageSlider-wrapper {
+  margin-bottom: 20px;
+}
+
+.LeverageSlider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.leverage-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.leverage-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.leverage-percent-btn {
+  padding: 4px 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.leverage-percent-btn:hover {
+  background: var(--bg-accent);
+  border-color: var(--bg-accent);
+  color: var(--text-primary);
+}
+
+.leverage-percent-btn:active {
+  background: var(--bg-accent-active);
+}
+
+.LeverageSlider-footer {
+  margin-top: 8px;
+}
+
+.leverage-range {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.Exchange-leverage-slider {
+  padding: 0 8px;
+}
+
+/* Override rc-slider styles for better appearance */
+.Exchange-leverage-slider .rc-slider-rail {
+  background-color: var(--bg-secondary);
+  height: 6px;
+}
+
+.Exchange-leverage-slider .rc-slider-track {
+  background: linear-gradient(90deg, #4a9eff 0%, #5b6cff 100%);
+  height: 6px;
+}
+
+.Exchange-leverage-slider.positive .rc-slider-track {
+  background: linear-gradient(90deg, #56dba8 0%, #4a9eff 100%);
+}
+
+.Exchange-leverage-slider.negative .rc-slider-track {
+  background: linear-gradient(90deg, #fb5971 0%, #ff8b3d 100%);
+}
+
+.Exchange-leverage-slider .rc-slider-handle {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--text-primary);
+  background-color: var(--bg-default);
+  margin-top: -6px;
+  opacity: 1;
+}
+
+.Exchange-leverage-slider .rc-slider-handle:hover,
+.Exchange-leverage-slider .rc-slider-handle:active,
+.Exchange-leverage-slider .rc-slider-handle:focus {
+  border-color: var(--text-accent);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+}
+
+.Exchange-leverage-slider .rc-slider-mark {
+  top: 18px;
+}
+
+.Exchange-leverage-slider .rc-slider-mark-text {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.Exchange-leverage-slider .rc-slider-dot {
+  background-color: var(--bg-tertiary);
+  border-color: var(--bg-tertiary);
+  width: 8px;
+  height: 8px;
+  bottom: -1px;
+}
+
+.Exchange-leverage-slider .rc-slider-dot-active {
+  border-color: var(--text-accent);
+}
+

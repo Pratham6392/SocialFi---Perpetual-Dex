@@ -38,6 +38,7 @@ import { cssTransition, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Modal from "components/Modal/Modal";
 import Checkbox from "components/Checkbox/Checkbox";
+import WalletModal from "components/Wallet/WalletModal";
 
 import "styles/Shared.css";
 import "styles/Font.css";
@@ -84,16 +85,14 @@ import {
   SLIPPAGE_BPS_KEY,
 } from "config/localStorage";
 import {
-  activateInjectedProvider,
   clearWalletConnectData,
   clearWalletLinkData,
-  getInjectedHandler,
   getWalletConnectHandler,
   hasCoinBaseWalletExtension,
-  hasMetaMaskWalletExtension,
   useEagerConnect,
   useHandleUnsupportedNetwork,
   useInactiveListener,
+  injectedConnector,
 } from "lib/wallets";
 import { useChainId } from "lib/chains";
 import ExternalLink from "components/ExternalLink/ExternalLink";
@@ -181,7 +180,6 @@ function FullApp() {
     setIsSettingsVisible(false);
   };
 
-  const connectInjectedWallet = getInjectedHandler(activate, deactivate);
   const activateWalletConnect = () => {
     getWalletConnectHandler(activate, deactivate, setActivatingConnector)();
   };
@@ -189,59 +187,22 @@ function FullApp() {
   const userOnMobileDevice = "navigator" in window && isMobileDevice(window.navigator);
 
   const activateMetaMask = () => {
-    if (!hasMetaMaskWalletExtension()) {
-      helperToast.error(
-        <div>
-          <Trans>MetaMask not detected.</Trans>
-          <br />
-          <br />
-          {userOnMobileDevice ? (
-            <Trans>
-              <ExternalLink href="https://metamask.io">Install MetaMask</ExternalLink>, and use U2U with its built-in
-              browser.
-            </Trans>
-          ) : (
-            <Trans>
-              <ExternalLink href="https://metamask.io">Install MetaMask</ExternalLink> to start using U2U.
-            </Trans>
-          )}
-        </div>
-      );
-      return false;
+    if (!window.ethereum) {
+      helperToast.error(t`MetaMask not detected. Please install MetaMask.`);
+      return;
     }
-    attemptActivateWallet("MetaMask");
+    
+    // Simple direct connection
+    activate(injectedConnector);
   };
   const activateCoinBase = () => {
     if (!hasCoinBaseWalletExtension()) {
-      helperToast.error(
-        <div>
-          <Trans>Coinbase Wallet not detected.</Trans>
-          <br />
-          <br />
-          {userOnMobileDevice ? (
-            <Trans>
-              <ExternalLink href="https://www.coinbase.com/wallet">Install Coinbase Wallet</ExternalLink>, and use U2U
-              with its built-in browser.
-            </Trans>
-          ) : (
-            <Trans>
-              <ExternalLink href="https://www.coinbase.com/wallet">Install Coinbase Wallet</ExternalLink> to start using
-              U2U.
-            </Trans>
-          )}
-        </div>
-      );
-      return false;
+      helperToast.error(t`Coinbase Wallet not detected. Please install Coinbase Wallet.`);
+      return;
     }
-    attemptActivateWallet("CoinBase");
+    activate(injectedConnector);
   };
 
-  const attemptActivateWallet = (providerName) => {
-    localStorage.setItem(SHOULD_EAGER_CONNECT_LOCALSTORAGE_KEY, true);
-    localStorage.setItem(CURRENT_PROVIDER_LOCALSTORAGE_KEY, providerName);
-    activateInjectedProvider(providerName);
-    connectInjectedWallet();
-  };
 
   const [walletModalVisible, setWalletModalVisible] = useState(false);
   const [redirectModalVisible, setRedirectModalVisible] = useState(false);
@@ -554,13 +515,13 @@ function FullApp() {
         setShouldHideRedirectModal={setShouldHideRedirectModal}
         shouldHideRedirectModal={shouldHideRedirectModal}
       />
-      {/* <Modal
-        className="Connect-wallet-modal"
+      <WalletModal
         isVisible={walletModalVisible}
         setIsVisible={setWalletModalVisible}
-        label={t`Connect Wallet`}
-      >
-      </Modal> */}
+        activateMetaMask={activateMetaMask}
+        activateCoinBase={activateCoinBase}
+        activateWalletConnect={activateWalletConnect}
+      />
       <Modal
         className="App-settings"
         isVisible={isSettingsVisible}
@@ -618,8 +579,21 @@ function FullApp() {
 function App() {
   useScrollToTop();
   useEffect(() => {
-    const defaultLanguage = localStorage.getItem(LANGUAGE_LOCALSTORAGE_KEY) || defaultLocale;
-    dynamicActivate(defaultLanguage);
+    // FORCE ENGLISH ONLY - Clear ALL non-English language data
+    const storedLanguage = localStorage.getItem(LANGUAGE_LOCALSTORAGE_KEY);
+    
+    // Clear all localStorage items related to language
+    if (storedLanguage && storedLanguage !== 'en') {
+      localStorage.removeItem(LANGUAGE_LOCALSTORAGE_KEY);
+      // Clear any cached translations
+      localStorage.clear();
+    }
+    
+    // Force set English
+    localStorage.setItem(LANGUAGE_LOCALSTORAGE_KEY, 'en');
+    
+    // Always activate English
+    dynamicActivate('en');
   }, []);
   return (
     <SWRConfig value={{ refreshInterval: 5000 }}>

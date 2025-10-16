@@ -99,7 +99,7 @@ export class WalletConnectConnector extends AbstractConnector {
     }
   }
 
-  async getProvider(): Promise<typeof this.walletConnectProvider> {
+  async getProvider(): Promise<any> {
     return this.walletConnectProvider;
   }
 

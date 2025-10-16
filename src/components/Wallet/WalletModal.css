@@ -1,0 +1,80 @@
+.Connect-wallet-modal .Modal-content {
+  max-width: 400px;
+}
+
+.wallet-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.Wallet-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.Wallet-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.Wallet-btn:active {
+  transform: translateY(0);
+}
+
+.Wallet-btn img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.Wallet-btn div {
+  flex: 1;
+}
+
+/* Specific button styles */
+.MetaMask-btn:hover {
+  border-color: #f6851b;
+  box-shadow: 0 0 10px rgba(246, 133, 27, 0.3);
+}
+
+.CoinbaseWallet-btn:hover {
+  border-color: #0052ff;
+  box-shadow: 0 0 10px rgba(0, 82, 255, 0.3);
+}
+
+.WalletConnect-btn:hover {
+  border-color: #3b99fc;
+  box-shadow: 0 0 10px rgba(59, 153, 252, 0.3);
+}
+
+@media (max-width: 768px) {
+  .Connect-wallet-modal .Modal-content {
+    max-width: 90vw;
+  }
+  
+  .Wallet-btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.938rem;
+  }
+  
+  .Wallet-btn img {
+    width: 28px;
+    height: 28px;
+  }
+}
+

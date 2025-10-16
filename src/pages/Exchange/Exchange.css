@@ -58,6 +58,34 @@
   margin-top: -1.5rem;
 }
 
+.Exchange-content-new {
+  display: grid;
+  grid-template-columns: 240px 1fr 320px 420px;
+  grid-gap: 16px;
+  padding: 24px;
+  padding-top: 0;
+  margin-top: -24px;
+  max-width: 100%;
+}
+
+.Exchange-middle {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.Exchange-chart-section {
+  flex: 1;
+  min-height: 500px;
+}
+
+.Exchange-right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .Exchange-position-list-orders {
   white-space: nowrap;
 }
@@ -312,6 +340,8 @@
   position: relative;
   z-index: 2;
   padding: 12px;
+  background: var(--bg-default);
+  border-radius: 6px 6px 0 0;
   box-shadow: 4px 4px 0px 0px #090d13;
 }
 
@@ -322,6 +352,8 @@
   right: 0;
   top: 8rem;
   z-index: 1;
+  background: var(--bg-default);
+  border-radius: 0 0 6px 6px;
   box-shadow: 4px 4px 0px 0px #090d13;
 }
 .ExchangeChart-bottom-controls {
@@ -686,9 +718,12 @@ table.Exchange-list th {
 }
 
 .Exchange-swap-box {
-  width: 41.85rem;
+  width: 420px;
   display: grid;
   position: relative;
+  background: var(--bg-default);
+  border-radius: 6px;
+  box-shadow: 4px 4px 0px 0px #090d13;
 }
 
 .Exchange-swap-market-box-title {
@@ -699,13 +734,16 @@ table.Exchange-list th {
 
 .Exchange-swap-box-inner {
   padding: 1.5rem;
-  box-shadow: 4px 4px 0px 0px #090d13;
+  background: var(--bg-default);
+  border-radius: 6px;
 }
 
 .Exchange-swap-market-box {
   padding: 1.5rem;
   margin-top: 1.25rem;
   padding-bottom: 1.5rem;
+  background: var(--bg-default);
+  border-radius: 6px;
   box-shadow: 4px 4px 0px 0px #090d13;
 }
 
@@ -741,9 +779,15 @@ table.Exchange-list th {
 
 .Exchange-swap-section {
   margin-bottom: 12px;
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 12px 16px 12px 16px;
   background-color: var(--bg-black);
+  border: 1px solid var(--bg-secondary);
+  transition: border-color 0.2s;
+}
+
+.Exchange-swap-section:hover {
+  border-color: var(--bg-accent);
 }
 
 .Exchange-swap-option-tabs.Tab.block .Tab-option {
@@ -752,15 +796,32 @@ table.Exchange-list th {
 
 .Exchange-swap-order-type-tabs {
   margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  padding: 6px;
+  background: var(--bg-secondary);
+  border-radius: 6px;
+}
+
+.Exchange-swap-order-type-tabs .Tab-option {
+  flex: 1;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
 .Exchange-swap-order-type-tabs .muted {
   color: var(--text-secondary) !important;
   opacity: 1 !important;
+  background: transparent;
 }
 
 .Exchange-swap-order-type-tabs .active {
   color: var(--text-primary) !important;
+  background: var(--bg-default);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .Exchange-swap-option-tabs.Tab.block .Tab-option-icon {
@@ -1135,9 +1196,35 @@ table.Exchange-list-small td {
   }
 }
 
+@media (max-width: 1500px) {
+  .Exchange-content-new {
+    grid-template-columns: 220px 1fr 280px 380px;
+    grid-gap: 12px;
+  }
+}
+
+@media (max-width: 1300px) {
+  .Exchange-content-new {
+    grid-template-columns: 1fr 420px;
+  }
+
+  .Exchange-right-section {
+    order: 2;
+  }
+
+  .Exchange-middle {
+    order: 1;
+  }
+}
+
 @media (max-width: 1100px) {
   .Exchange-swap-box {
     width: auto;
+  }
+
+  .Exchange-content-new {
+    grid-template-columns: 1fr;
+    padding: 16px;
   }
 
   .ExchangeChart.tv .ExchangeChart-bottom-header {
@@ -1253,26 +1340,37 @@ table.Exchange-list-small td {
     display: none;
   }
 
-  .Exchange-content {
+  .Exchange-content,
+  .Exchange-content-new {
     padding: 1.5rem;
     padding-top: 1.5rem;
+    grid-gap: 12px;
   }
 
   .Exchange {
     padding-top: 1.5rem !important;
   }
+
+  .Exchange-swap-box {
+    width: 100%;
+  }
+
   .Useful-links-swapbox {
     display: none;
   }
+  
   .Exchange-swap-box {
     grid-template-columns: 1fr;
   }
+  
   .Useful-links-exchange {
     display: block;
   }
+  
   .Exchange-list.small {
     grid-template-columns: 1fr;
   }
+  
   .Exchange-list.small.trading-history {
     display: grid;
     grid-template-columns: 1fr;
@@ -1280,6 +1378,24 @@ table.Exchange-list-small td {
     max-height: 268px;
     overflow: hidden;
     overflow-y: scroll;
+  }
+
+  .MarketsSidebar,
+  .OrderBook {
+    width: 100%;
+  }
+
+  .Exchange-chart-section {
+    min-height: 400px;
+  }
+
+  .leverage-buttons {
+    flex-wrap: wrap;
+  }
+
+  .leverage-percent-btn {
+    font-size: 11px;
+    padding: 3px 8px;
   }
 }
 
@@ -1328,7 +1444,7 @@ table.Exchange-list-small td {
   box-shadow: 4px 4px 0px 0px #090d13;
   background-color: var(--bg-default);
   padding: 8px 16px 20px 16px;
-  margin-top: 16px;
+  margin-top: 0;
   border-radius: 6px;
 }
 

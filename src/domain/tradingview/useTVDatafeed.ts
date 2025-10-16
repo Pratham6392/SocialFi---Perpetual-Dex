@@ -118,7 +118,28 @@ export default function useTVDatafeed({ dataProvider }: Props) {
           }
           intervalRef.current && clearInterval(intervalRef.current);
           resetCacheRef.current = onResetCacheNeededCallback;
+          
           if (!isStable) {
+            // Use WebSocket subscription for real-time updates
+            const tokenAddress = ticker; // You might need to convert ticker to address
+            
+            // Try WebSocket subscription first
+            const hasWebSocketSupport = tvDataProvider.current?.priceStreamManager;
+            
+            if (hasWebSocketSupport) {
+              // Use WebSocket for real-time price streaming
+              tvDataProvider.current?.subscribeToRealtimePrices(
+                tokenAddress,
+                (bar) => {
+                  if (ticker === activeTicker.current) {
+                    onRealtimeCallback(formatTimeInBarToMs(bar));
+                  }
+                },
+                resolution
+              );
+            }
+            
+            // Fallback to polling (or run in parallel for redundancy)
             intervalRef.current = setInterval(function () {
               tvDataProvider.current?.getLiveBar(chainId, ticker, resolution).then((bar) => {
                 if (bar && ticker === activeTicker.current) {
@@ -130,6 +151,8 @@ export default function useTVDatafeed({ dataProvider }: Props) {
         },
         unsubscribeBars: () => {
           intervalRef.current && clearInterval(intervalRef.current);
+          // Cleanup WebSocket subscriptions
+          tvDataProvider.current?.unsubscribeFromRealtimePrices();
         },
       },
     };

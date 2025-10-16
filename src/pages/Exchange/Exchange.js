@@ -22,6 +22,7 @@ import {
 } from "lib/legacy";
 import { getConstant, getExplorerUrl } from "config/chains";
 import { approvePlugin, useExecutionFee, cancelMultipleOrders } from "domain/legacy";
+import { mockDataProvider, shouldUseMockData } from "domain/mockDataProvider";
 
 import { getContract } from "config/contracts";
 
@@ -39,6 +40,9 @@ import TradeHistory from "components/Exchange/TradeHistory";
 import ExchangeWalletTokens from "components/Exchange/ExchangeWalletTokens";
 import Tab from "components/Tab/Tab";
 import Footer from "components/Footer/Footer";
+import MarketsSidebar from "components/Exchange/MarketsSidebar";
+import OrderBook from "components/Exchange/OrderBook";
+import { MockDataStatus } from "domain/mockDataProvider";
 
 import "./Exchange.css";
 import { contractFetcher } from "lib/contracts";
@@ -460,7 +464,9 @@ export const Exchange = forwardRef((props, ref) => {
 
   const tokenAddresses = tokens.map((token) => token.address);
   const { data: tokenBalances } = useSWR(active && [active, chainId, readerAddress, "getTokenBalances", account], {
-    fetcher: contractFetcher(library, Reader, [tokenAddresses]),
+    fetcher: shouldUseMockData() 
+      ? () => mockDataProvider.getTokenBalances(chainId, account)
+      : contractFetcher(library, Reader, [tokenAddresses]),
   });
 
   const { data: positionData, error: positionDataError } = useSWR(
@@ -476,7 +482,9 @@ export const Exchange = forwardRef((props, ref) => {
   const positionsDataIsLoading = active && !positionData && !positionDataError;
 
   const { data: fundingRateInfo } = useSWR([active, chainId, readerAddress, "getFundingRates"], {
-    fetcher: contractFetcher(library, Reader, [vaultAddress, nativeTokenAddress, whitelistedTokenAddresses]),
+    fetcher: shouldUseMockData()
+      ? () => mockDataProvider.getFundingRates(chainId)
+      : contractFetcher(library, Reader, [vaultAddress, nativeTokenAddress, whitelistedTokenAddresses]),
   });
 
   const { data: totalTokenWeights } = useSWR(
@@ -508,7 +516,6 @@ export const Exchange = forwardRef((props, ref) => {
 
   const { infoTokens } = useInfoTokens(library, chainId, active, tokenBalances, fundingRateInfo);
 
-  console.log("infoTokenádsdfs :>> ", infoTokens);
   const { minExecutionFee, minExecutionFeeUSD, minExecutionFeeErrorMessage } = useExecutionFee(
     library,
     active,
@@ -921,15 +928,36 @@ export const Exchange = forwardRef((props, ref) => {
     );
   };
 
+  const onSelectMarket = (token) => {
+    setToTokenAddress(swapOption, token.address);
+  };
+
+  const toToken = getToken(chainId, toTokenAddress);
+
   return (
     <div className="Exchange page-layout">
+      <MockDataStatus />
       {/* {showBanner && <ExchangeBanner hideBanner={hideBanner} />} */}
-      <div className="Exchange-content">
-        <div className="Exchange-left">
-          {renderChart()}
+      <div className="Exchange-content-new">
+        <MarketsSidebar
+          tokens={tokens}
+          infoTokens={infoTokens}
+          chainId={chainId}
+          selectedToken={toToken}
+          onSelectToken={onSelectMarket}
+        />
+        <div className="Exchange-middle">
+          <div className="Exchange-chart-section">
+            {renderChart()}
+          </div>
           <div className="Exchange-lists large">{getListSection()}</div>
         </div>
-        <div className="Exchange-right">
+        <div className="Exchange-right-section">
+          <OrderBook
+            token={toToken}
+            infoTokens={infoTokens}
+            chainId={chainId}
+          />
           <SwapBox
             pendingPositions={pendingPositions}
             setPendingPositions={setPendingPositions}

@@ -1,11 +1,11 @@
 import { LAST_BAR_REFRESH_INTERVAL, SUPPORTED_RESOLUTIONS } from "config/tradingview";
-import { getLimitChartPricesFromStats, timezoneOffset } from "domain/prices";
+import { getLimitChartPricesFromStats, timezoneOffset, PriceStreamManager } from "domain/prices";
 import { CHART_PERIODS, USD_DECIMALS } from "lib/legacy";
 import { formatAmount } from "lib/numbers";
 import { Bar } from "./types";
 import { formatTimeInBarToMs, getCurrentCandleTime } from "./utils";
 import { fillBarGaps, getCurrentPriceOfToken, getStableCoinPrice, getTokenChartPrice } from "./requests";
-import { BigNumberish } from "ethers";
+import { BigNumberish, BigNumber } from "ethers";
 import { PeriodParams } from "charting_library";
 
 const initialHistoryBarsInfo = {
@@ -24,13 +24,29 @@ export class TVDataProvider {
     data: Bar[];
     ticker: string;
   };
+  priceStreamManager: PriceStreamManager | null;
+  chainId: number;
+  realtimeUpdateCallback: ((bar: Bar) => void) | null;
+  priceSubscriptionUnsubscribe: (() => void) | null;
 
-  constructor() {
+  constructor(chainId?: number) {
     this.lastBar = null;
     this.startTime = 0;
     this.lastTicker = "";
     this.lastPeriod = "";
     this.barsInfo = initialHistoryBarsInfo;
+    this.chainId = chainId || 0;
+    this.priceStreamManager = chainId ? new PriceStreamManager(chainId) : null;
+    this.realtimeUpdateCallback = null;
+    this.priceSubscriptionUnsubscribe = null;
+  }
+
+  setChainId(chainId: number) {
+    this.chainId = chainId;
+    if (this.priceStreamManager) {
+      this.priceStreamManager.unsubscribeAll();
+    }
+    this.priceStreamManager = new PriceStreamManager(chainId);
   }
 
   async getCurrentPriceOfToken(chainId: number, ticker: string): Promise<BigNumberish> {
@@ -175,6 +191,83 @@ export class TVDataProvider {
       };
       this.lastBar = newBar;
       return this.lastBar;
+    }
+  }
+
+  // Subscribe to real-time price updates via WebSocket
+  subscribeToRealtimePrices(tokenAddress: string, callback: (bar: Bar) => void, resolution: string) {
+    if (!this.priceStreamManager) return null;
+
+    this.realtimeUpdateCallback = callback;
+    const period = SUPPORTED_RESOLUTIONS[resolution];
+
+    // Unsubscribe from previous subscription if exists
+    if (this.priceSubscriptionUnsubscribe) {
+      this.priceSubscriptionUnsubscribe();
+    }
+
+    // Subscribe to price updates
+    this.priceSubscriptionUnsubscribe = this.priceStreamManager.subscribe(
+      tokenAddress,
+      (price: BigNumber) => {
+        const currentCandleTime = getCurrentCandleTime(period);
+        const averagePriceValue = parseFloat(formatAmount(price, USD_DECIMALS, 4));
+
+        if (!this.lastBar) {
+          // Create initial bar
+          this.lastBar = {
+            time: currentCandleTime,
+            open: averagePriceValue,
+            close: averagePriceValue,
+            high: averagePriceValue,
+            low: averagePriceValue,
+            ticker: tokenAddress,
+          };
+          callback(this.lastBar);
+          return;
+        }
+
+        // Update existing bar or create new one
+        if (this.lastBar.time === currentCandleTime) {
+          // Update current candle
+          this.lastBar = {
+            ...this.lastBar,
+            close: averagePriceValue,
+            high: Math.max(this.lastBar.high, averagePriceValue),
+            low: Math.min(this.lastBar.low, averagePriceValue),
+          };
+        } else {
+          // New candle
+          this.lastBar = {
+            time: currentCandleTime,
+            open: this.lastBar.close,
+            close: averagePriceValue,
+            high: Math.max(this.lastBar.close, averagePriceValue),
+            low: Math.min(this.lastBar.close, averagePriceValue),
+            ticker: tokenAddress,
+          };
+        }
+        callback(this.lastBar);
+      }
+    );
+
+    return this.priceSubscriptionUnsubscribe;
+  }
+
+  // Unsubscribe from real-time price updates
+  unsubscribeFromRealtimePrices() {
+    if (this.priceSubscriptionUnsubscribe) {
+      this.priceSubscriptionUnsubscribe();
+      this.priceSubscriptionUnsubscribe = null;
+    }
+    this.realtimeUpdateCallback = null;
+  }
+
+  // Cleanup all subscriptions
+  cleanup() {
+    this.unsubscribeFromRealtimePrices();
+    if (this.priceStreamManager) {
+      this.priceStreamManager.unsubscribeAll();
     }
   }
 }

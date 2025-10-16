@@ -6,9 +6,115 @@ import { USD_DECIMALS, CHART_PERIODS } from "lib/legacy";
 import { UTX_STATS_API_URL } from "config/backend";
 import { sleep } from "lib/sleep";
 import { formatAmount } from "lib/numbers";
-import { getNativeToken, getNormalizedTokenSymbol, isChartAvailabeForToken } from "config/tokens";
+import { getNativeToken, getNormalizedTokenSymbol, isChartAvailabeForToken, getToken } from "config/tokens";
+import { getAlchemyWsUrl, ARBITRUM, FTM_TESTNET, U2U_TESTNET } from "config/chains";
+import { 
+  shouldUseMockData, 
+  generateMockPriceData, 
+  generateMockCurrentPrice, 
+  generateMockStablePrice,
+  generateMockFundingRates,
+  generateMockVolumeData
+} from "./mockData";
 
 const BigNumber = ethers.BigNumber;
+
+// WebSocket providers for real-time price feeds
+export const arbWsProvider = new ethers.providers.WebSocketProvider(getAlchemyWsUrl());
+export const ftmWsProvider = new ethers.providers.JsonRpcProvider("https://fantom-testnet.publicnode.com");
+export const u2uWsProvider = new ethers.providers.JsonRpcProvider("https://rpc-nebulas-testnet.uniultra.xyz");
+
+// Get the appropriate WebSocket provider for a chain
+export function getWsProvider(chainId: number) {
+  if (chainId === ARBITRUM) {
+    return arbWsProvider;
+  }
+  if (chainId === FTM_TESTNET) {
+    return ftmWsProvider;
+  }
+  if (chainId === U2U_TESTNET) {
+    return u2uWsProvider;
+  }
+  return null;
+}
+
+// WebSocket subscription manager for real-time price updates
+export class PriceStreamManager {
+  private subscriptions: Map<string, any[]> = new Map();
+  private provider: ethers.providers.Provider | null = null;
+  private chainId: number;
+
+  constructor(chainId: number) {
+    this.chainId = chainId;
+    this.provider = getWsProvider(chainId);
+  }
+
+  // Subscribe to price updates for a token
+  subscribe(tokenAddress: string, callback: (price: ethers.BigNumber) => void) {
+    const key = `${this.chainId}-${tokenAddress}`;
+    if (!this.subscriptions.has(key)) {
+      this.subscriptions.set(key, []);
+    }
+    this.subscriptions.get(key)?.push(callback);
+
+    // Start polling for price updates (simplified version)
+    // In a real implementation, this would use Chainlink price feeds or a proper WebSocket
+    const intervalId = setInterval(async () => {
+      try {
+        const price = await this.fetchCurrentPrice(tokenAddress);
+        if (price) {
+          const callbacks = this.subscriptions.get(key) || [];
+          callbacks.forEach(cb => cb(price));
+        }
+      } catch (error) {
+        console.error('Error fetching price:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    // Return unsubscribe function
+    return () => {
+      clearInterval(intervalId);
+      const callbacks = this.subscriptions.get(key);
+      if (callbacks) {
+        const index = callbacks.indexOf(callback);
+        if (index > -1) {
+          callbacks.splice(index, 1);
+        }
+      }
+    };
+  }
+
+  private async fetchCurrentPrice(tokenAddress: string): Promise<ethers.BigNumber | null> {
+    // Use mock data in development mode
+    if (shouldUseMockData()) {
+      try {
+        const token = getToken(this.chainId, tokenAddress);
+        if (token.isStable) {
+          return generateMockStablePrice();
+        } else {
+          return generateMockCurrentPrice(token.symbol);
+        }
+      } catch (error) {
+        console.warn('Mock data generation failed:', error);
+        return null;
+      }
+    }
+
+    // Production: fetch from backend API
+    try {
+      const response = await fetch(`${UTX_STATS_API_URL}/price/${tokenAddress}?chainId=${this.chainId}`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      return BigNumber.from(data.price);
+    } catch {
+      return null;
+    }
+  }
+
+  unsubscribeAll() {
+    this.subscriptions.clear();
+  }
+}
 
 // Ethereum network, Chainlink Aggregator contracts
 const FEED_ID_MAP = {
@@ -67,6 +173,22 @@ export function fillGaps(prices, periodSeconds) {
 }
 
 export async function getLimitChartPricesFromStats(chainId, symbol, period, limit = 1) {
+  // Use mock data in development mode
+  if (shouldUseMockData()) {
+    try {
+      symbol = getNormalizedTokenSymbol(symbol);
+      return generateMockPriceData(symbol, period, limit);
+    } catch (error) {
+      console.warn('Mock limit chart data generation failed:', error);
+      return [];
+    }
+  }
+
+  // Check if API URL is configured
+  if (!UTX_STATS_API_URL) {
+    return [];
+  }
+
   symbol = getNormalizedTokenSymbol(symbol);
 
   if (!isChartAvailabeForToken(chainId, symbol)) {
@@ -77,19 +199,35 @@ export async function getLimitChartPricesFromStats(chainId, symbol, period, limi
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      return [];
     }
     const data = await response.json();
     const prices = data?.prices;
 
     return prices.map(formatBarInfo);
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log(`Error fetching data: ${error}`);
+    // Silently fail - API not available
+    return [];
   }
 }
 
 export async function getChartPricesFromStats(chainId, symbol, period) {
+  // Use mock data in development mode
+  if (shouldUseMockData()) {
+    try {
+      symbol = getNormalizedTokenSymbol(symbol);
+      return generateMockPriceData(symbol, period, 300);
+    } catch (error) {
+      console.warn('Mock chart data generation failed:', error);
+      return [];
+    }
+  }
+
+  // Check if API URL is configured
+  if (!UTX_STATS_API_URL) {
+    throw new Error('API URL not configured');
+  }
+
   symbol = getNormalizedTokenSymbol(symbol);
 
   const timeDiff = CHART_PERIODS[period] * 3000;

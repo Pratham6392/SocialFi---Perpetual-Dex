@@ -171,6 +171,42 @@ export default function SwapBox(props) {
   const [modalError, setModalError] = useState(false);
   const [isHigherSlippageAllowed, setIsHigherSlippageAllowed] = useState(false);
 
+  // Direct MetaMask connection function
+  const connectMetaMaskDirectly = async () => {
+    if (!window.ethereum) {
+      helperToast.error(
+        <div>
+          <Trans>MetaMask not detected.</Trans>
+          <br />
+          <br />
+          <Trans>
+            Please install <a href="https://metamask.io" target="_blank" rel="noopener noreferrer" style={{ color: "#3b99fc", textDecoration: "underline" }}>MetaMask</a> to connect your wallet.
+          </Trans>
+        </div>
+      );
+      return;
+    }
+
+    try {
+      // Request account access using ethers.js
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      
+      // Trigger the existing connectWallet flow to properly set up Web3React
+      props.connectWallet();
+      
+      helperToast.success(t`Wallet connected successfully!`);
+    } catch (error) {
+      console.error("Error connecting to MetaMask:", error);
+      if (error.code === 4001) {
+        // User rejected the connection
+        helperToast.error(t`Connection rejected. Please approve the connection in MetaMask.`);
+      } else {
+        helperToast.error(t`Failed to connect wallet. Please try again.`);
+      }
+    }
+  };
+
   let allowedSlippage = savedSlippageAmount;
   if (isHigherSlippageAllowed) {
     allowedSlippage = DEFAULT_HIGHER_SLIPPAGE_AMOUNT;
@@ -1645,7 +1681,8 @@ export default function SwapBox(props) {
     }
 
     if (!active) {
-      props.connectWallet();
+      // Direct MetaMask connection using ethers.js
+      connectMetaMaskDirectly();
       return;
     }
 

@@ -36,12 +36,20 @@ export type NetworkMetadata = {
   blockExplorerUrls: string[];
 };
 
-const injectedConnector = new InjectedConnector({
+export const injectedConnector = new InjectedConnector({
   supportedChainIds: SUPPORTED_CHAIN_IDS,
 });
 
 export function hasMetaMaskWalletExtension() {
-  return window.ethereum;
+  const { ethereum } = window;
+  
+  if (!ethereum) {
+    return false;
+  }
+  
+  // Check if it's MetaMask specifically
+  return ethereum.isMetaMask || 
+         (ethereum.providers && ethereum.providers.find(({ isMetaMask }) => isMetaMask));
 }
 
 export function hasCoinBaseWalletExtension() {

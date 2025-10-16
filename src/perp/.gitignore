@@ -1,0 +1,41 @@
+# Hardhat files
+cache/
+artifacts/
+deployments/
+coverage/
+coverage.json
+typechain/
+typechain-types/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Node modules
+node_modules/
+
+# Build files
+build/
+dist/
+
+# Testing
+.coverage_artifacts
+.coverage_cache
+.coverage_contracts
+
+# Misc
+.DS_Store
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# ABIs (if you want to regenerate them)
+# abis/*.json
+

@@ -2,12 +2,23 @@ import { getServerUrl } from "config/backend";
 import { getTokenBySymbol, getWrappedToken } from "config/tokens";
 import { getChainlinkChartPricesFromGraph, getChartPricesFromStats, timezoneOffset } from "domain/prices";
 import { CHART_PERIODS } from "lib/legacy";
+import { shouldUseMockData, generateMockPriceData } from "domain/mockData";
 
 function getCurrentBarTimestamp(periodSeconds) {
   return Math.floor(Date.now() / (periodSeconds * 1000)) * (periodSeconds * 1000);
 }
 
 export const getTokenChartPrice = async (chainId: number, symbol: string, period: string) => {
+  // Use mock data in development mode
+  if (shouldUseMockData()) {
+    try {
+      return generateMockPriceData(symbol, period, 300);
+    } catch (error) {
+      console.warn('Mock chart price generation failed:', error);
+      return [];
+    }
+  }
+
   let prices;
   try {
     prices = await getChartPricesFromStats(chainId, symbol, period);
@@ -26,6 +37,22 @@ export const getTokenChartPrice = async (chainId: number, symbol: string, period
 };
 
 export async function getCurrentPriceOfToken(chainId: number, symbol: string) {
+  // Use mock data in development mode
+  if (shouldUseMockData()) {
+    try {
+      const { generateMockCurrentPrice, generateMockStablePrice } = await import("domain/mockData");
+      const token = getTokenBySymbol(chainId, symbol);
+      if (token.isStable) {
+        return generateMockStablePrice();
+      } else {
+        return generateMockCurrentPrice(symbol);
+      }
+    } catch (error) {
+      console.warn('Mock current price generation failed:', error);
+      return null;
+    }
+  }
+
   try {
     const indexPricesUrl = getServerUrl(chainId, "/prices");
     const response = await fetch(indexPricesUrl);

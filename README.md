@@ -1,92 +1,246 @@
-# SocialFi
+# SocialFi - Decentralized Perpetual Trading Platform
 
-This platform encompasses key functionalities such as pooling, liquidity provision, staking (farming), and trading. We are building a **decentralized exchange (DEX)** within the EVM ecosystem, powered by an **Automated Market Maker (AMM)**.
-
-Beyond trading, this project integrates **social and community-driven features**, enabling users to not only trade but also **connect, share strategies, and grow together** in the Web3 era.
+A comprehensive **decentralized perpetual futures exchange (DEX)** built on EVM-compatible chains, featuring advanced trading capabilities, social features, and innovative DeFi solutions.
 
 ![alt text](public/ultrax2.png)
 
 ---
 
-## How to run the project?
+## 🚀 Core DeFi Problems Solved
+
+### 1. **Liquidity Bootstrapping on Low-TVL Chains**
+
+**Problem:** New L1s like U2U (~$10M TVL) struggle with perp DEXes due to no liquidity providers, causing 20-50% slippage and low adoption.
+
+**Our Solution:**
+
+- **Virtual AMM (vAMM)** simulates infinite liquidity without requiring initial LPs
+- Enables trades with minimal slippage from day one
+- DePIN yields attract early stakers (5-10% APY) to bootstrap real liquidity
+
+### 2. **Cross-Chain Trading Complexity**
+
+**Problem:** Users need to bridge assets across multiple chains to access different perpetual markets.
+
+**Our Solution:**
+
+- **LayerZero Integration** for seamless cross-chain asset transfers
+- Unified trading experience across Arbitrum, U2U, and other EVM chains
+- Single interface for multi-chain perpetual trading
+
+### 3. **High Trading Fees & Poor UX**
+
+**Problem:** Traditional perp DEXes have complex interfaces and high fees.
+
+**Our Solution:**
+
+- **Intuitive Trading Interface** with real-time charts and order books
+- **Competitive Fee Structure** with transparent pricing
+- **Social Trading Features** for better user engagement
+
+---
+
+## 🎯 Key Features
+
+### 📈 **Advanced Trading**
+
+- **Perpetual Futures Trading** with up to 50x leverage
+- **Real-time Price Feeds** via Chainlink oracles
+- **Advanced Order Types** (Market, Limit, Stop-loss)
+- **TradingView Integration** for professional charting
+- **Order Book & Depth Charts** for market analysis
+- **Position Management** with automated liquidation protection
+
+### 💰 **DeFi Integration**
+
+- **Liquidity Provision** with automated market making
+- **Staking Rewards** for UTX and ULP tokens
+- **Yield Farming** with competitive APRs
+- **Governance Participation** through token voting
+- **Fee Distribution** to token holders (30% UTX, 70% ULP)
+
+### 🌐 **Cross-Chain Capabilities**
+
+- **Multi-Chain Support** (Arbitrum, U2U, Ethereum)
+- **LayerZero Bridge** for seamless asset transfers
+- **Unified Wallet Experience** across all chains
+- **Cross-Chain Position Management**
+
+### 👥 **Social Trading Features**
+
+- **Trader Profiles** with performance metrics
+- **Copy Trading** - follow and replicate successful strategies
+- **Social Leaderboards** and achievement systems
+- **Community Governance** with on-chain voting
+- **Decentralized Identity (DID)** for user profiles
+- **Social Feed** for strategy sharing and discussion
+
+### 🔒 **Security & Risk Management**
+
+- **Insurance Fund** for bad debt coverage
+- **Automated Liquidation** with fair price discovery
+- **Margin Requirements** with real-time monitoring
+- **Smart Contract Audits** and security best practices
+
+---
+
+## 🏗️ Technical Architecture
+
+### **Smart Contracts**
+
+- **ClearingHouse** - Main trading logic and position management
+- **vAMM** - Virtual automated market maker for liquidity
+- **AccountBalance** - Collateral and margin management
+- **Funding** - Funding rate mechanism for price alignment
+- **InsuranceFund** - Risk management and bad debt coverage
+- **Oracle** - Price feed integration and validation
+
+### **Frontend Stack**
+
+- **React.js** with modern UI/UX design
+- **Web3 Integration** via ethers.js and Web3React
+- **Real-time Data** with WebSocket connections
+- **TradingView Charts** for professional analysis
+- **Responsive Design** for mobile and desktop
+
+### **Supported Networks**
+
+- **Arbitrum** (Mainnet & Sepolia Testnet)
+- **U2U Chain** (Testnet)
+- **Ethereum** (via LayerZero)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18 or 20
+- MetaMask or compatible Web3 wallet
+- Testnet tokens for testing
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone <repository-url>
+cd catalystv1
 
 # Install dependencies
 npm install
 
-# Use node version 18 or 20 to avoid dependency issues
-
-# Start the project
+# Start the development server
 npm start
+```
+
+### Smart Contract Deployment
+
+```bash
+# Navigate to contracts directory
+cd src/perp
+
+# Install Hardhat dependencies
+npm install
+
+# Compile contracts
+npm run compile
+
+# Deploy to testnet
+npm run deploy:arbitrum-sepolia
 ```
 
 ---
 
-## Introduction
+## 📊 Platform Modules
 
-Website:
+### 1. **Trade** 📈
 
-### Overview of the Website
+Advanced perpetual trading interface with:
 
-The website offers a comprehensive platform for trading, earning, and engaging with the community, featuring **five main modules**: Trade, Dashboard, Earn, Buy, and Social. Each module provides tools for effective trading, investment, and community interaction.
+- Real-time price charts and market data
+- Position management and risk controls
+- Order book and depth visualization
+- Trading history and performance analytics
 
----
+### 2. **Dashboard** 📊
 
-### 1. Trade
+Comprehensive analytics dashboard featuring:
 
-In the Trade section, users can access advanced tools to manage positions:
+- 24h volume and open interest metrics
+- Long/short position distributions
+- Liquidity pool statistics
+- Token performance and governance data
 
-* Current Token Price, Token Volume, and 24h High/Low.
-* Trading History and Wallet Position overview.
-* Exchange functionality for selecting tokens, setting leverage, and executing orders.
+### 3. **Earn** 💎
 
----
+Staking and yield farming platform:
 
-### 2. Dashboard
+- UTX and ULP token staking
+- Competitive APR rewards
+- Vault vesting for reward management
+- Pool statistics and performance metrics
 
-The Dashboard provides key insights, including:
+### 4. **Buy** 💰
 
-* 24h Volume, Open Interest, Long/Short Positions.
-* Liquidity Pool statistics.
-* UTX and ULP governance token details.
-* ULP/UTX Index Composition.
+Direct token acquisition:
 
----
+- UTX (Utility + Governance) - earns 30% platform fees
+- ULP (Liquidity Provider) - earns 70% platform fees
+- Multiple purchase options (DEX/Centralized)
 
-### 3. Earn
+### 5. **Social** 👥
 
-The Earn module enables staking UTX and ULP tokens to earn rewards (esUTX).
+Community-driven trading features:
 
-* Wallet overview with token balances and claimable rewards.
-* Stake, unstake, and claim functions.
-* Staking pool statistics (APR, total supply, reward rates).
-* Vault Vesting for reward conversion and management.
-
----
-
-### 4. Buy
-
-The Buy section allows users to purchase UTX or ULP directly.
-
-* **UTX**: Utility + governance token (earns 30% of platform fees).
-* **ULP**: Liquidity provider token (earns 70% of platform fees).
-* Options to buy via decentralized or centralized services.
+- Trader profiles with reputation systems
+- Copy trading and strategy sharing
+- Community governance and voting
+- Leaderboards and achievement systems
+- Decentralized messaging and identity
 
 ---
 
-### 5. Social (New)
+## 🔧 Development
 
-The Social module connects trading with community interaction, introducing **SocialFi elements**:
+### Smart Contract Development
 
-* **Profiles & Reputation:** Wallet-linked profiles with trading history, achievements, and community badges.
-* **Social Trading:** Follow top traders, copy strategies, and view public portfolios.
-* **Community Governance:** Participate in voting and proposals directly in-app.
-* **Leaderboards & Gamification:** Track top performers, join challenges, and earn rewards for activity.
-* **On-chain Identity & Messaging:** Connect with other users via decentralized identity (DID) and wallet-based communication.
+```bash
+cd src/perp
+npm run compile    # Compile contracts
+npm run test       # Run tests
+npm run deploy:local  # Deploy to local network
+```
+
+### Frontend Development
+
+```bash
+npm start          # Start development server
+npm run build      # Build for production
+npm test           # Run frontend tests
+```
 
 ---
 
-## Vision
+## 🌟 Vision
 
-This platform empowers users not just to trade, but to **engage in a social ecosystem** where finance meets community. It’s more than a DEX — it’s a hub for **decentralized trading, collaboration, and growth.**
+This platform represents the future of decentralized trading - where **finance meets community**. We're building more than just a DEX; we're creating a **social ecosystem** that empowers users to:
+
+- **Trade** with institutional-grade tools
+- **Earn** through innovative DeFi mechanisms
+- **Connect** with a global trading community
+- **Govern** the platform's future direction
+- **Grow** together in the Web3 economy
+
+---
+
+## 📞 Support
+
+For technical support, feature requests, or community discussions:
+
+- **Documentation**: Check our comprehensive guides
+- **Community**: Join our Discord/Telegram
+- **Issues**: Report bugs via GitHub Issues
+
+---
+
+_Built with ❤️ for the decentralized future_

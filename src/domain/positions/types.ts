@@ -17,7 +17,7 @@ export type Position = {
   lastIncreasedTime: number;
   hasProfit: boolean;
   delta: BigNumber;
-  markPrice: BigNumber;
+  markPrice: BigNumber; 
   fundingFee: BigNumber;
   collateralAfterFee: BigNumber;
   closingFee: BigNumber;
@@ -34,7 +34,7 @@ export type Position = {
   deltaPercentageAfterFees: BigNumber;
   deltaAfterFeesStr: string;
   deltaAfterFeesPercentageStr: string;
-  netValue: BigNumber;
+  netValue: BigNumber; 
   leverage: BigNumber;
   leverageStr: string;
 };
