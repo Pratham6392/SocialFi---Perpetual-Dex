@@ -4,6 +4,10 @@ A comprehensive **decentralized perpetual futures exchange (DEX)** built on EVM-
 
 ![alt text](public/ultrax2.png)
 
+**Trading page**
+<img width="1888" height="872" alt="Screenshot 2025-10-17 043245" src="https://github.com/user-attachments/assets/e894a31c-f007-4931-bcba-b21887548ce9" />
+
+
 ---
 
 ## 🚀 Core DeFi Problems Solved
