@@ -43,7 +43,6 @@ import Tab from "components/Tab/Tab";
 import Footer from "components/Footer/Footer";
 import MarketsSidebar from "components/Exchange/MarketsSidebar";
 import OrderBook from "components/Exchange/OrderBook";
-import { MockDataStatus } from "domain/mockDataProvider";
 
 import "./Exchange.css";
 import { contractFetcher } from "lib/contracts";
@@ -938,7 +937,6 @@ export const Exchange = forwardRef((props, ref) => {
 
   return (
     <div className="Exchange page-layout">
-      <MockDataStatus />
       {/* {showBanner && <ExchangeBanner hideBanner={hideBanner} />} */}
       <div className="Exchange-content-new">
         <MarketsSidebar
