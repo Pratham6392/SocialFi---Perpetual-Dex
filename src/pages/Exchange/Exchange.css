@@ -1474,3 +1474,38 @@ table.Exchange-list-small td {
   height: 24px;
   margin-right: 16px;
 }
+
+/* Trading Mode Toggle */
+.Exchange-trading-mode {
+  margin-bottom: 16px;
+}
+
+.trading-mode-toggle {
+  display: flex;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid #333;
+}
+
+.trading-mode-toggle button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #888;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.trading-mode-toggle button:hover {
+  color: #fff;
+}
+
+.trading-mode-toggle button.active {
+  background: #3b82f6;
+  color: #fff;
+}

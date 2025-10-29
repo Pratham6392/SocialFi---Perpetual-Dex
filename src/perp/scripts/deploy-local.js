@@ -32,14 +32,19 @@ async function main() {
   // Step 4: Deploy AccountBalance
   console.log("\n4. Deploying AccountBalance...");
   const AccountBalance = await ethers.getContractFactory("AccountBalance");
-  const accountBalance = await AccountBalance.deploy();
+  const accountBalance = await AccountBalance.deploy(
+    ethers.constants.AddressZero, // Will set ClearingHouse later
+    vaultAddress
+  );
   await accountBalance.deployed();
   console.log("AccountBalance deployed to:", accountBalance.address);
 
   // Step 5: Deploy Funding
   console.log("\n5. Deploying Funding...");
   const Funding = await ethers.getContractFactory("Funding");
-  const funding = await Funding.deploy();
+  const funding = await Funding.deploy(
+    ethers.constants.AddressZero // Will set ClearingHouse later
+  );
   await funding.deployed();
   console.log("Funding deployed to:", funding.address);
 
@@ -75,7 +80,11 @@ async function main() {
   // Step 8: Deploy Pool for liquidity
   console.log("\n8. Deploying Pool...");
   const Pool = await ethers.getContractFactory("Pool");
-  const pool = await Pool.deploy();
+  const pool = await Pool.deploy(
+    vammETH.address, // vamm
+    vaultAddress, // collateralToken
+    clearingHouse.address // clearingHouse
+  );
   await pool.deployed();
   console.log("Pool deployed to:", pool.address);
 
@@ -105,7 +114,7 @@ async function main() {
   // Save addresses to file
   const fs = require("fs");
   const addresses = {
-    network: hre.network.name,
+    network: "hardhat",
     oracle: oracle.address,
     insuranceFund: insuranceFund.address,
     accountBalance: accountBalance.address,
@@ -117,10 +126,10 @@ async function main() {
   };
 
   fs.writeFileSync(
-    `./deployments/${hre.network.name}.json`,
+    `./deployments/hardhat.json`,
     JSON.stringify(addresses, null, 2)
   );
-  console.log(`\nAddresses saved to ./deployments/${hre.network.name}.json`);
+  console.log(`\nAddresses saved to ./deployments/hardhat.json`);
 }
 
 main()
@@ -129,4 +138,3 @@ main()
     console.error(error);
     process.exit(1);
   });
-

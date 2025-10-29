@@ -118,6 +118,7 @@ function getNextAveragePrice({ size, sizeDelta, hasProfit, delta, nextPrice, isL
 
 export default function SwapBox(props) {
   const {
+    tradingMode = 'spot', // Default to spot trading
     pendingPositions,
     setPendingPositions,
     infoTokens,
@@ -222,6 +223,19 @@ export default function SwapBox(props) {
   const isLong = swapOption === LONG;
   const isShort = swapOption === SHORT;
   const isSwap = swapOption === SWAP;
+  
+  // Determine if we're in spot trading mode (no leverage, no long/short)
+  const isSpotTrading = tradingMode === 'spot';
+  
+  // Define available options based on trading mode
+  const availableSwapOptions = isSpotTrading ? [SWAP] : [LONG, SHORT, SWAP];
+  
+  // Ensure swap option is selected when in spot trading mode
+  useEffect(() => {
+    if (isSpotTrading && swapOption !== SWAP) {
+      setSwapOption(SWAP);
+    }
+  }, [isSpotTrading, swapOption, setSwapOption]);
 
   function getTokenLabel() {
     switch (true) {
@@ -1950,7 +1964,7 @@ export default function SwapBox(props) {
           <div>
             <Tab
               icons={SWAP_ICONS}
-              options={SWAP_OPTIONS}
+              options={availableSwapOptions}
               optionLabels={SWAP_LABELS}
               option={swapOption}
               onChange={onSwapOptionChange}

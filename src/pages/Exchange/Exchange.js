@@ -33,6 +33,7 @@ import Token from "abis/Token.json";
 
 import Checkbox from "components/Checkbox/Checkbox";
 import SwapBox from "components/Exchange/SwapBox";
+import PerpSwapBox from "components/Exchange/PerpSwapBox";
 import ExchangeTVChart, { getChartToken } from "components/Exchange/ExchangeTVChart";
 import PositionsList from "components/Exchange/PositionsList";
 import OrdersList from "components/Exchange/OrdersList";
@@ -711,6 +712,7 @@ export const Exchange = forwardRef((props, ref) => {
   const [isPositionRouterApproving, setIsPositionRouterApproving] = useState(false);
   const [isCancelMultipleOrderProcessing, setIsCancelMultipleOrderProcessing] = useState(false);
   const [cancelOrderIdList, setCancelOrderIdList] = useState([]);
+  const [tradingMode, setTradingMode] = useState('spot'); // 'spot' or 'perp'
 
   const onMultipleCancelClick = useCallback(
     async function () {
@@ -958,7 +960,29 @@ export const Exchange = forwardRef((props, ref) => {
             infoTokens={infoTokens}
             chainId={chainId}
           />
-          <SwapBox
+          
+          {/* Trading Mode Toggle */}
+          <div className="Exchange-trading-mode">
+            <div className="trading-mode-toggle">
+              <button
+                className={tradingMode === 'spot' ? 'active' : ''}
+                onClick={() => setTradingMode('spot')}
+              >
+                Spot Trading
+              </button>
+              <button
+                className={tradingMode === 'perp' ? 'active' : ''}
+                onClick={() => setTradingMode('perp')}
+              >
+                Perpetual Trading
+              </button>
+            </div>
+          </div>
+
+          {/* Conditional SwapBox Rendering */}
+          {tradingMode === 'spot' ? (
+            <SwapBox
+            tradingMode={tradingMode}
             pendingPositions={pendingPositions}
             setPendingPositions={setPendingPositions}
             setIsWaitingForPluginApproval={setIsWaitingForPluginApproval}
@@ -1005,6 +1029,9 @@ export const Exchange = forwardRef((props, ref) => {
             minExecutionFeeUSD={minExecutionFeeUSD}
             minExecutionFeeErrorMessage={minExecutionFeeErrorMessage}
           />
+          ) : (
+            <PerpSwapBox />
+          )}
           <div className="Exchange-wallet-tokens">
             <div className="Exchange-wallet-tokens-content">
               <ExchangeWalletTokens tokens={tokens} infoTokens={infoTokens} onSelectToken={onSelectWalletToken} />
