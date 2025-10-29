@@ -125,3 +125,4 @@ typechain-types/
 # Test files
 test-results/
 coverage/
+.vercel
