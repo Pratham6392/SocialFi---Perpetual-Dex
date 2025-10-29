@@ -120,51 +120,83 @@ export default function TVChartContainer({
   }, [symbol, chartReady, period, chainId]);
 
   useEffect(() => {
-    const widgetOptions = {
-      debug: false,
-      symbol: symbolRef.current, // Using ref to avoid unnecessary re-renders on symbol change and still have access to the latest symbol
-      datafeed: datafeed,
-      theme: defaultChartProps.theme,
-      container: chartContainerRef.current,
-      library_path: defaultChartProps.library_path,
-      locale: defaultChartProps.locale,
-      loading_screen: defaultChartProps.loading_screen,
-      enabled_features: defaultChartProps.enabled_features,
-      disabled_features: isMobile
-        ? defaultChartProps.disabled_features.concat(disabledFeaturesOnMobile)
-        : defaultChartProps.disabled_features,
-      client_id: defaultChartProps.clientId,
-      user_id: defaultChartProps.userId,
-      fullscreen: defaultChartProps.fullscreen,
-      autosize: defaultChartProps.autosize,
-      custom_css_url: defaultChartProps.custom_css_url,
-      overrides: defaultChartProps.overrides,
-      interval: getObjectKeyFromValue(period, SUPPORTED_RESOLUTIONS),
-      favorites: defaultChartProps.favorites,
-      custom_formatters: defaultChartProps.custom_formatters,
-      save_load_adapter: new SaveLoadAdapter(chainId, tvCharts, setTvCharts, onSelectToken),
-    };
-    tvWidgetRef.current = new window.TradingView.widget(widgetOptions);
-    tvWidgetRef.current!.onChartReady(function () {
-      setChartReady(true);
-      tvWidgetRef.current!.applyOverrides({
-        "paneProperties.background": "#151E2C",
-        "paneProperties.backgroundType": "solid",
-      });
-      tvWidgetRef.current
-        ?.activeChart()
-        .onIntervalChanged()
-        .subscribe(null, (interval) => {
-          if (SUPPORTED_RESOLUTIONS[interval]) {
-            const period = SUPPORTED_RESOLUTIONS[interval];
-            setPeriod(period);
-          }
-        });
+    let retryCount = 0;
+    const MAX_RETRIES = 50; // 5 seconds max wait time
+    
+    // Wait for TradingView library to load
+    const initChart = () => {
+      if (!window.TradingView || !window.TradingView.widget) {
+        retryCount++;
+        if (retryCount >= MAX_RETRIES) {
+          console.error("TradingView library failed to load after maximum retries");
+          setChartDataLoading(false);
+          return;
+        }
+        console.warn(`TradingView library not loaded yet, retrying... (${retryCount}/${MAX_RETRIES})`);
+        setTimeout(initChart, 100);
+        return;
+      }
 
-      tvWidgetRef.current?.activeChart().dataReady(() => {
+      if (!chartContainerRef.current) {
+        console.warn("Chart container not available");
+        return;
+      }
+
+      const widgetOptions = {
+        debug: false,
+        symbol: symbolRef.current, // Using ref to avoid unnecessary re-renders on symbol change and still have access to the latest symbol
+        datafeed: datafeed,
+        theme: defaultChartProps.theme,
+        container: chartContainerRef.current,
+        library_path: defaultChartProps.library_path,
+        locale: defaultChartProps.locale,
+        loading_screen: defaultChartProps.loading_screen,
+        enabled_features: defaultChartProps.enabled_features,
+        disabled_features: isMobile
+          ? defaultChartProps.disabled_features.concat(disabledFeaturesOnMobile)
+          : defaultChartProps.disabled_features,
+        client_id: defaultChartProps.clientId,
+        user_id: defaultChartProps.userId,
+        fullscreen: defaultChartProps.fullscreen,
+        autosize: defaultChartProps.autosize,
+        custom_css_url: defaultChartProps.custom_css_url,
+        overrides: defaultChartProps.overrides,
+        interval: getObjectKeyFromValue(period, SUPPORTED_RESOLUTIONS),
+        favorites: defaultChartProps.favorites,
+        custom_formatters: defaultChartProps.custom_formatters,
+        save_load_adapter: new SaveLoadAdapter(chainId, tvCharts, setTvCharts, onSelectToken),
+      };
+
+      try {
+        tvWidgetRef.current = new window.TradingView.widget(widgetOptions);
+        tvWidgetRef.current!.onChartReady(function () {
+          setChartReady(true);
+          tvWidgetRef.current!.applyOverrides({
+            "paneProperties.background": "#151E2C",
+            "paneProperties.backgroundType": "solid",
+          });
+          tvWidgetRef.current
+            ?.activeChart()
+            .onIntervalChanged()
+            .subscribe(null, (interval) => {
+              if (SUPPORTED_RESOLUTIONS[interval]) {
+                const period = SUPPORTED_RESOLUTIONS[interval];
+                setPeriod(period);
+              }
+            });
+
+          tvWidgetRef.current?.activeChart().dataReady(() => {
+            setChartDataLoading(false);
+          });
+        });
+      } catch (error) {
+        console.error("Error initializing TradingView widget:", error);
         setChartDataLoading(false);
-      });
-    });
+      }
+    };
+
+    // Start initialization
+    initChart();
 
     return () => {
       if (tvWidgetRef.current) {

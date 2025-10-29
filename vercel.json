@@ -6,6 +6,10 @@
   "framework": "create-react-app",
   "rewrites": [
     {
+      "source": "/charting_library/(.*)",
+      "destination": "/charting_library/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
