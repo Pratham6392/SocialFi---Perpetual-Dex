@@ -191,6 +191,8 @@ export default function TVChartContainer({
         });
       } catch (error) {
         console.error("Error initializing TradingView widget:", error);
+        console.error("Widget options:", widgetOptions);
+        console.error("Container element:", chartContainerRef.current);
         setChartDataLoading(false);
       }
     };
@@ -213,8 +215,18 @@ export default function TVChartContainer({
   return (
     <div className="ExchangeChart-error">
       {chartDataLoading && <Loader />}
+      {!chartDataLoading && !chartReady && window.TradingView && (
+        <p style={{ color: "#ff5353", padding: "20px", textAlign: "center" }}>
+          Chart failed to initialize. Please refresh the page.
+        </p>
+      )}
+      {!window.TradingView && (
+        <p style={{ color: "#ff5353", padding: "20px", textAlign: "center" }}>
+          TradingView library failed to load. Please check your network connection and refresh.
+        </p>
+      )}
       <div
-        style={{ visibility: !chartDataLoading ? "visible" : "hidden" }}
+        style={{ visibility: !chartDataLoading && chartReady ? "visible" : "hidden", height: chartReady ? "100%" : "0" }}
         ref={chartContainerRef}
         className="TVChartContainer ExchangeChart-bottom-content"
       />

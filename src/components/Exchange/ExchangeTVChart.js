@@ -347,7 +347,13 @@ export default function ExchangeTVChart(props) {
             dataProvider={dataProvider.current}
           />
         ) : (
-          <p className="ExchangeChart-error">Sorry, chart is not supported on this network yet.</p>
+          <div className="ExchangeChart-error" style={{ padding: "20px", textAlign: "center" }}>
+            <p>Sorry, chart is not supported on this network yet.</p>
+            <p style={{ fontSize: "12px", marginTop: "10px", color: "#888" }}>
+              ChainId: {chainId}, Symbol: {chartToken?.symbol || "N/A"}, 
+              Available networks: {availableNetworksForChart.join(", ")}
+            </p>
+          </div>
         )}
       </div>
     </div>

@@ -3,7 +3,10 @@ import { getTokens, getTokenBySymbol } from "config/tokens";
 import { CHART_PERIODS } from "lib/legacy";
 
 // Mock data configuration
-export const USE_MOCK_DATA = process.env.NODE_ENV === 'development' || process.env.REACT_APP_USE_MOCK_DATA === 'true';
+// Enable mock data by default in both development and production
+// Can be disabled by setting REACT_APP_USE_MOCK_DATA='false'
+const shouldUseMockDataEnv = process.env.REACT_APP_USE_MOCK_DATA;
+export const USE_MOCK_DATA = shouldUseMockDataEnv === 'false' ? false : true;
 
 // Base prices for different tokens (in USD, will be converted to proper decimals)
 const MOCK_BASE_PRICES = {
@@ -282,6 +285,13 @@ export function generateMockVolumeData(chainId: number): { [tokenAddress: string
 
 // Utility function to check if mock data should be used
 export function shouldUseMockData(): boolean {
+  if (USE_MOCK_DATA) {
+    // Log once in console to confirm mock data is enabled (only in browser)
+    if (typeof window !== 'undefined' && !(window as any).__MOCK_DATA_LOGGED) {
+      console.log('%c[Mock Data]', 'color: #ff6b6b; font-weight: bold;', 'Mock data is ENABLED - Using generated price data for charts');
+      (window as any).__MOCK_DATA_LOGGED = true;
+    }
+  }
   return USE_MOCK_DATA;
 }
 

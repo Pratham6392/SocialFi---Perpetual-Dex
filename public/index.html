@@ -61,7 +61,21 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <script src="/charting_library/charting_library.standalone.js"></script>
+    <script>
+      // Load TradingView library and ensure it's available globally
+      (function() {
+        var script = document.createElement('script');
+        script.src = '/charting_library/charting_library.standalone.js';
+        script.async = false; // Load synchronously
+        script.onerror = function() {
+          console.error('Failed to load TradingView charting library');
+        };
+        script.onload = function() {
+          console.log('TradingView charting library loaded successfully');
+        };
+        document.head.appendChild(script);
+      })();
+    </script>
     <script src="https://unpkg.com/react/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-collapse/build/react-collapse.min.js"></script>
   </body>
